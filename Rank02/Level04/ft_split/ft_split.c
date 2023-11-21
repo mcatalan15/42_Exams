@@ -1,46 +1,42 @@
+/* ************************************************************************** */
+/*                                                                            */
+/*                                                        :::      ::::::::   */
+/*   ft_split.c                                         :+:      :+:    :+:   */
+/*                                                    +:+ +:+         +:+     */
+/*   By: mcatalan@student.42barcelona.com <mcata    +#+  +:+       +#+        */
+/*                                                +#+#+#+#+#+   +#+           */
+/*   Created: 2023/11/21 12:38:53 by mcatalan@st       #+#    #+#             */
+/*   Updated: 2023/11/21 12:39:06 by mcatalan@st      ###   ########.fr       */
+/*                                                                            */
+/* ************************************************************************** */
+
 #include <stdlib.h>
 #include <stdio.h>
+#include <string.h>
 
-char *ft_strncpy(char *s1, char *s2, int n)
+char	**ft_split(char *str)
 {
-	int i = -1;
+	char	**split = (char **)malloc(1000);
+	int		i = 0;
+	int		j = 0;
+	int		k = 0;
 
-	while (++i < n && s2[i])
-		s1[i] = s2[i];
-	s1[i] = '\0';
-	return (s1);
-}
-
-char **ft_split(char *str)
-{
-	int i = 0;
-	int j = 0;
-	int k = 0;
-	int wc = 0;
 	while (str[i])
 	{
-		while (str[i] && (str[i] == ' ' || str[i] == '\t' || str[i] == '\n'))
+		while (str[i] == ' ' || str[i] == '\t' || str[i] == '\n')
 			i++;
-		if (str[i])
-			wc++;
-		while (str[i] && (str[i] != ' ' && str[i] != '\t' && str[i] != '\n'))
-			i++;
-	}
-	char **out = (char **)malloc(sizeof(char *) * (wc + 1));
-	i = 0;
-	while (str[i])
-	{
-		while (str[i] && (str[i] == ' ' || str[i] == '\t' || str[i] == '\n'))
-			i++;
-		j = i;
-		while (str[i] && (str[i] != ' ' && str[i] != '\t' && str[i] != '\n'))
-			i++;
-		if (i > j)
+		split[k] = malloc(1000);
+		while (str[i] != ' ' && str[i] != '\t' && str[i] != '\0' && str[i] != '\n')
 		{
-			out[k] = (char *)malloc(sizeof(char) * ((i - j) + 1));
-			ft_strncpy(out[k++], &str[j], i - j);
+			split[k][j] = str[i];
+			i++;
+			j++;
 		}
+		split[k][j] = '\0';
+		if (str[i - 1] != ' ' && str[i - 1] != '\t' && str[i - 1] != '\0')
+			k++;
+		j = 0;
 	}
-	out[k] = NULL;
-	return (out);
+	split[k] = NULL;
+	return (split);
 }
