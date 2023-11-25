@@ -1,49 +1,32 @@
 #include <unistd.h>
 
-int is_whitespace(char c)
+int ft_strlen(char *str)
 {
-	return (c == ' ' || c == '\t');
+	int i;
+
+	i = 0;
+	while (str[i])
+		i++;
+	return (i);
 }
 
-void last_word(char *str)
+int main(int ac, char **av)
 {
-	int i = 0;
-	int last_word_start = -1;
+	int i;
 
-	while (str[i])
+	if (ac == 2)
 	{
-		if (!is_whitespace(str[i]))
+		i = ft_strlen(av[1]) - 1;
+		while (av[1][i] == ' ' || av[1][i] == '\t')
+			i--;
+		while ((av[1][i] != ' ' && av[1][i] != '\t') && i >= 0)
+			i--;
+		i += 1;
+		while (av[1][i] && av[1][i] != ' ' && av[1][i] != '\t')
 		{
-			last_word_start = i;
-			while (str[i] && !is_whitespace(str[i]))
-				i++;
-		}
-		else
-		{
+			write(1, &av[1][i], 1);
 			i++;
 		}
 	}
-
-	if (last_word_start != -1)
-	{
-		while (str[last_word_start] && !is_whitespace(str[last_word_start]))
-		{
-			write(1, &str[last_word_start], 1);
-			last_word_start++;
-		}
-	}
 	write(1, "\n", 1);
-}
-
-int main(int argc, char **argv)
-{
-	if (argc == 2)
-	{
-		last_word(argv[1]);
-	}
-	else
-	{
-		write(1, "\n", 1);
-	}
-	return 0;
 }
