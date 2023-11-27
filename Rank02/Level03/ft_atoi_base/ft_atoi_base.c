@@ -1,43 +1,36 @@
-char to_lower(char c)
+int nbr_inbase(char c, int base)
 {
-	if (c >= 'A' && c <= 'Z')
-		return (c + ('a' - 'A'));
-	return (c);
+	if (base <= 10)
+		return (c >= '0' && c <= '9');
+	return ((c >= '0' && c <= '9') || (c >= 'A' && c <= ('A' + base - 10)) ||
+			(c >= 'a' && c <= ('a' + base - 10)));
 }
 
-int get_digit(char c, int digits_in_base)
+int ft_atoi_base(const char *str, int base)
 {
-	int max_digit;
-	if (digits_in_base <= 10)
-		max_digit = digits_in_base + '0';
-	else
-		max_digit = digits_in_base - 10 + 'a';
+	int i;
+	int nbr;
+	int sign;
 
-	if (c >= '0' && c <= '9' && c <= max_digit)
-		return (c - '0');
-	else if (c >= 'a' && c <= 'f' && c <= max_digit)
-		return (10 + c - 'a');
-	else
-		return (-1);
-}
-
-int ft_atoi_base(const char *str, int str_base)
-{
-	int result = 0;
-	int sign = 1;
-	int digit;
-
-	if (*str == '-')
+	if (!str[0] || (base < 2 || base > 16))
+		return (0);
+	nbr = 0;
+	sign = 1;
+	while (str[i] == '\t' || str[i] == '\v' || str[i] == '\n' ||
+		   str[i] == ' ' || str[i] == '\r' || str[i] == '\f')
+		i += 1;
+	if (str[i] == '-' || str[i] == '+')
+		if (str[i++] == '-')
+			sign *= -1;
+	while (str[i] && nbr_inbase(str[i], base))
 	{
-		sign = -1;
-		++str;
+		if (str[i] >= 'A' && 'F' >= str[i])
+			nbr = (nbr * base) + (str[i] - 'A' + 10);
+		else if (str[i] >= 'a' && 'f' >= str[i])
+			nbr = (nbr * base) + (str[i] - 'a' + 10);
+		else
+			nbr = (nbr * base) + (str[i] - '0');
+		i += 1;
 	}
-
-	while ((digit = get_digit(to_lower(*str), str_base)) >= 0)
-	{
-		result = result * str_base;
-		result = result + (digit * sign);
-		++str;
-	}
-	return (result);
+	return (nbr * sign);
 }
