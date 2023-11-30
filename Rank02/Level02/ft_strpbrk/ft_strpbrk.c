@@ -2,14 +2,14 @@
 
 char *ft_strchr(const char *s, int c)
 {
-	size_t idx;
+	size_t i;
 
-	idx = 0;
-	while (s[idx] != '\0')
+	i = 0;
+	while (s[i] != '\0')
 	{
-		if (s[idx] == c)
+		if (s[i] == c)
 			return ((char *)s);
-		idx++;
+		i++;
 	}
 	return (NULL);
 }
