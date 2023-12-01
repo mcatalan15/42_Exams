@@ -25,25 +25,15 @@ int ft_atoi_base(const char *str, int str_base)
 			int digitValue;
 
 			if (currentChar >= '0' && currentChar <= '9')
-			{
 				digitValue = currentChar - '0';
-			}
 			else if (currentChar >= 'a' && currentChar <= 'f')
-			{
 				digitValue = 10 + currentChar - 'a';
-			}
 			else
-			{
 				digitValue = 10 + currentChar - 'A';
-			}
-
 			result = result * str_base + digitValue;
 		}
 		else
-		{
 			break;
-		}
-
 		str++;
 	}
 
