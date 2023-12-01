@@ -1,36 +1,60 @@
-int nbr_inbase(char c, int base)
-{
-	if (base <= 10)
-		return (c >= '0' && c <= '9');
-	return ((c >= '0' && c <= '9') || (c >= 'A' && c <= ('A' + base - 10)) ||
-			(c >= 'a' && c <= ('a' + base - 10)));
-}
+#include <unistd.h>
+#include <stdio.h>
+#include <stdlib.h>
 
-int ft_atoi_base(const char *str, int base)
+int ft_atoi_base(const char *str, int str_base)
 {
-	int i;
-	int nbr;
-	int sign;
+	int result = 0;
+	int sign = 1;
 
-	if (!str[0] || (base < 2 || base > 16))
-		return (0);
-	nbr = 0;
-	sign = 1;
-	while (str[i] == '\t' || str[i] == '\v' || str[i] == '\n' ||
-		   str[i] == ' ' || str[i] == '\r' || str[i] == '\f')
-		i += 1;
-	if (str[i] == '-' || str[i] == '+')
-		if (str[i++] == '-')
-			sign *= -1;
-	while (str[i] && nbr_inbase(str[i], base))
+	if (*str == '-')
 	{
-		if (str[i] >= 'A' && 'F' >= str[i])
-			nbr = (nbr * base) + (str[i] - 'A' + 10);
-		else if (str[i] >= 'a' && 'f' >= str[i])
-			nbr = (nbr * base) + (str[i] - 'a' + 10);
-		else
-			nbr = (nbr * base) + (str[i] - '0');
-		i += 1;
+		sign = -1;
+		str++;
 	}
-	return (nbr * sign);
+
+	while (*str)
+	{
+		char currentChar = *str;
+
+		if ((currentChar >= '0' && currentChar <= '9') ||
+			(currentChar >= 'a' && currentChar <= 'f') ||
+			(currentChar >= 'A' && currentChar <= 'F'))
+		{
+
+			int digitValue;
+
+			if (currentChar >= '0' && currentChar <= '9')
+			{
+				digitValue = currentChar - '0';
+			}
+			else if (currentChar >= 'a' && currentChar <= 'f')
+			{
+				digitValue = 10 + currentChar - 'a';
+			}
+			else
+			{
+				digitValue = 10 + currentChar - 'A';
+			}
+
+			result = result * str_base + digitValue;
+		}
+		else
+		{
+			break;
+		}
+
+		str++;
+	}
+
+	return result * sign;
 }
+
+// int main()
+// {
+// 	const char *hexNumber = "16";
+// 	int decimalNumber = ft_atoi_base(hexNumber, 1010);
+// 	printf("Decimal equivalent of %s is: %d\n", hexNumber, decimalNumber);
+
+// 	return 0;
+// }
