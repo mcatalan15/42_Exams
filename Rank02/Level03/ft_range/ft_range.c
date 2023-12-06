@@ -2,24 +2,18 @@
 
 int *ft_range(int start, int end)
 {
+	int *range;
 	int i = 0;
-	int len = abs((end - start)) + 1;
-	int *res = (int *)malloc(sizeof(int) * len);
 
-	while (i < len)
+	if (start > end)
+		range = (int *)malloc(sizeof(int) * (start - end) + 1);
+	else
+		range = (int *)malloc(sizeof(int) * (end - start) + 1);
+	while (start != end)
 	{
-		if (start < end)
-		{
-			res[i] = start;
-			start++;
-			i++;
-		}
-		else
-		{
-			res[i] = start;
-			start--;
-			i++;
-		}
+		range[i++] = start;
+		start += (start > end) ? -1 : 1;
 	}
-	return (res);
+	range[i] = start;
+	return (range);
 }

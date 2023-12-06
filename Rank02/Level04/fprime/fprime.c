@@ -3,24 +3,23 @@
 
 int	main(int argc, char *argv[])
 {
-	int	i;
-	int	number;
+	int	i = 1;
+	int	nb;
 
 	if (argc == 2)
 	{
-		i = 1;
-		number = atoi(argv[1]);
-		if (number == 1)
+		nb = atoi(argv[1]);
+		if (nb == 1)
 			printf("1");
-		while (number >= ++i)
+		while (nb >= ++i)
 		{
-			if (number % i == 0)
+			if (nb % i == 0)
 			{
 				printf("%d", i);
-				if (number == i)
+				if (nb == i)
 					break ;
 				printf("*");
-				number /= i;
+				nb /= i;
 				i = 1;
 			}
 		}

@@ -4,40 +4,40 @@
 
 int ft_atoi_base(const char *str, int str_base)
 {
-	int result = 0;
-	int sign = 1;
+	int i = 0;
+	int res = 0;
+	int neg = 1;
 
-	if (*str == '-')
+	if (str[i] == '-')
 	{
-		sign = -1;
-		str++;
+		neg = -1;
+		i++;
 	}
 
-	while (*str)
+	while (str[i])
 	{
-		char currentChar = *str;
+		char c = str[i];
 
-		if ((currentChar >= '0' && currentChar <= '9') ||
-			(currentChar >= 'a' && currentChar <= 'f') ||
-			(currentChar >= 'A' && currentChar <= 'F'))
+		if ((c >= '0' && c <= '9') ||
+			(c >= 'a' && c <= 'f') ||
+			(c >= 'A' && c <= 'F'))
 		{
 
 			int digitValue;
 
-			if (currentChar >= '0' && currentChar <= '9')
-				digitValue = currentChar - '0';
-			else if (currentChar >= 'a' && currentChar <= 'f')
-				digitValue = 10 + currentChar - 'a';
+			if (c >= '0' && c <= '9')
+				digitValue = c - '0';
+			else if (c >= 'a' && c <= 'f')
+				digitValue = 10 + c - 'a';
 			else
-				digitValue = 10 + currentChar - 'A';
-			result = result * str_base + digitValue;
+				digitValue = 10 + c - 'A';
+			res = res * str_base + digitValue;
 		}
 		else
-			break;
-		str++;
+			break ;
+		i++;
 	}
-
-	return result * sign;
+	return (res * neg);
 }
 
 // int main()
