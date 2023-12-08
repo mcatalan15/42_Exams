@@ -6,7 +6,7 @@
 /*   By: mcatalan@student.42barcelona.com <mcata    +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2023/11/21 12:38:53 by mcatalan@st       #+#    #+#             */
-/*   Updated: 2023/11/21 12:39:06 by mcatalan@st      ###   ########.fr       */
+/*   Updated: 2023/12/08 11:23:15 by mcatalan@st      ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -40,3 +40,4 @@ char	**ft_split(char *str)
 	split[k] = NULL;
 	return (split);
 }
+
