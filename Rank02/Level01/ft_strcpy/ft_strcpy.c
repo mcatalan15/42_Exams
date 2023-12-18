@@ -12,16 +12,15 @@
 
 #include <unistd.h>
 
-char	*ft_strcpy(char *dest, char const *src)
+char	*ft_strcpy(char *s1, char const *s2)
 {
-	int	i;
+	int	i = 0;
 
-	i = 0;
-	while (src[i] != '\0')
+	while (s2[i] != '\0')
 	{
-		dest[i] = src[i];
+		s1[i] = s2[i];
 		i++;
 	}
-	dest[i] = '\0';
-	return (dest);
+	s1[i] = '\0';
+	return (s1);
 }
