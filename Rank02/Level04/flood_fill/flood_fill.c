@@ -35,9 +35,9 @@ void	flood_fill(char **tab, t_point size, t_point begin)
 
 // int main(void)
 // {
-// 	t_point size = {8, 5};
+// 	t_point size = {0, 0};
 // 	char *zone[] = {
-// 		"11111111",
+// 		"01111111",
 // 		"10001001",
 // 		"10010001",
 // 		"10110001",

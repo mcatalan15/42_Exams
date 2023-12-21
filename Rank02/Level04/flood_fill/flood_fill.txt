@@ -54,7 +54,7 @@ int main(void)
 		"11111111",
 		"10001001",
 		"10010001",
-		"10110001",
+		"10110101",
 		"11100001",
 	};
 
@@ -80,6 +80,6 @@ $> gcc flood_fill.c test.c -o test; ./test
 FFFFFFFF
 F000F00F
 F00F000F
-F0FF000F
+F0FF010F
 FFF0000F
 $>

@@ -10,6 +10,7 @@ Your function must be declared as follows:
 
 unsigned char	reverse_bits(unsigned char octet);
 
+
 Example:
 
   1 byte

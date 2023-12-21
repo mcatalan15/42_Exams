@@ -1,26 +1,20 @@
 #include <stddef.h> // For NULL || (void *)0 || 0
 
-char *ft_strchr(const char *s, int c)
-{
-	size_t i;
-
-	i = 0;
-	while (s[i] != '\0')
-	{
-		if (s[i] == c)
-			return ((char *)s);
-		i++;
-	}
-	return (NULL);
-}
-
 char *ft_strpbrk(const char *s1, const char *s2)
 {
-	while (*s1)
+	int i = 0;
+	int j = 0;
+
+	while (s1[i])
 	{
-		if (ft_strchr(s2, *s1))
-			return ((char *)s1);
-		s1++;
+		j = 0;
+		while (s2[j])
+		{
+			if (s1[i] == s2[j])
+				return ((char *)s1[i]);
+			j++;
+		}
+		i++;
 	}
 	return (NULL);
 }
