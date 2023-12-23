@@ -42,8 +42,8 @@ int ft_atoi_base(const char *str, int str_base)
 
 // int main()
 // {
-// 	const char *hexNumber = "16";
-// 	int decimalNumber = ft_atoi_base(hexNumber, 1010);
+// 	const char *hexNumber = "aa";
+// 	int decimalNumber = ft_atoi_base(hexNumber, 16);
 // 	printf("Decimal equivalent of %s is: %d\n", hexNumber, decimalNumber);
 
 // 	return 0;
