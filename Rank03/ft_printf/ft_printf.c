@@ -48,3 +48,30 @@ int ft_printf(const char *format, ...)
 	}
 	return (va_end(pointer), length);
 }
+
+
+int main(void)
+{
+	// Test string formatting
+	ft_printf("This is a string: %s\n", "Hello, world!");
+
+	// Test integer formatting
+	ft_printf("This is an integer: %d\n", 42);
+
+	// Test hexadecimal formatting
+	ft_printf("This is a hexadecimal number: %x\n", 255);
+
+	// Test multiple format specifiers
+	ft_printf("Multiple specifiers: %s %d %x\n", "Hello", 123, 456);
+
+	// Test NULL string
+	ft_printf("NULL string: %s\n", NULL);
+
+	// Test negative integer
+	ft_printf("Negative integer: %d\n", -123);
+
+	// Test zero
+	ft_printf("Zero: %d\n", 0);
+
+	return 0;
+}
