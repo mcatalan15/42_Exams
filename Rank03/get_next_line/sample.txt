@@ -1,0 +1,5 @@
+This is a sample text file for testing get_next_line.
+It contains multiple lines.
+Each line ends with a newline character.
+
+Let's see how get_next_line handles reading this file.
