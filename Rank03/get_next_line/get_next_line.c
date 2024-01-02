@@ -1,4 +1,4 @@
-#include "get_next_line.h"
+#include "gnl.h"
 
 char *ft_strchr(char *s, int c)
 {
