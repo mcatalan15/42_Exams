@@ -1,24 +1,25 @@
 #include <unistd.h>
 
-int ft_atoi(char *str)
+int ft_atoi(const char *str)
 {
-	int result;
-	int sign;
+	int i = 0;
+	int neg = 1;
+	int res = 0;
 
-	result = 0;
-	sign = 1;
-	while (*str == ' ' || (*str >= 9 && *str <= 13))
-		str++;
-	if (*str == '-')
-		sign = -1;
-	if (*str == '-' || *str == '+')
-		str++;
-	while (*str >= '0' && *str <= '9')
+	while (str[i] == ' ' || (str[i] >= 9 && str[i] <= 13))
+		i++;
+	if (str[i] == '-' || str[i] == '+')
 	{
-		result = result * 10 + *str - '0';
-		str++;
+		if (str[i] == '-')
+			neg *= -1;
+		i++;
 	}
-	return (sign * result);
+	while (str[i] >= '0' && str[i] <= '9')
+	{
+		res = (str[i] - '0') + (res * 10);
+		i++;
+	}
+	return (res * neg);
 }
 
 void ft_putchar(char c)
