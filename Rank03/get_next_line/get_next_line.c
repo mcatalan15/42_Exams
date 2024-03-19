@@ -104,6 +104,8 @@ char *get_next_line(int fd)
 	return (line);
 }
 
+/* ---------- main ---------- */
+
 int main(void)
 {
 	int fd;

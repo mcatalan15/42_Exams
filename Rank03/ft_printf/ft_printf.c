@@ -49,6 +49,7 @@ int ft_printf(const char *format, ...)
 	return (va_end(pointer), length);
 }
 
+/* ---------- main ---------- */
 
 int main(void)
 {
