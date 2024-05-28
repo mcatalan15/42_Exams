@@ -23,7 +23,7 @@ void ft_execute(char *argv[], int i, int tmp_fd, char *env[])
 	exit(1);
 }
 
-int	main(int argc, char *argv[], char *env[])
+int	main(int argc, char **argv, char **env)
 {
 	int	i;
 	int fd[2];
