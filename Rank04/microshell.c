@@ -1,69 +1,80 @@
-#include <string.h>
 #include <unistd.h>
 #include <sys/wait.h>
+#include <string.h>
+#include <stdlib.h>
 
-int err(char *str)
+void	ft_putstr_fd2(char *str, char *arg)
 {
-    while (*str)
-        write(2, str++, 1);
-    return 1;
+	while (*str)
+		write(2, str++, 1);
+	if (arg)
+		while(*arg)
+			write(2, arg++, 1);
+	write(2, "\n", 1);
 }
 
-int cd(char **argv, int i)
+void ft_execute(char *argv[], int i, int tmp_fd, char *env[])
 {
-    if (i != 2)
-        return err("error: cd: bad arguments\n");
-    if (chdir(argv[1]) == -1)
-        return err("error: cd: cannot change directory to "), err(argv[1]), err("\n");
-    return 0;
+	argv[i] = NULL;
+	dup2(tmp_fd, STDIN_FILENO);
+	close(tmp_fd);
+	execve(argv[0], argv, env);
+	ft_putstr_fd2("error: cannot execute ", argv[0]);
+	exit(1);
 }
 
-int exec(char **argv, int i)
+int	main(int argc, char *argv[], char *env[])
 {
-    int fd[2];
-    int status;
-    int has_pipe = argv[i] && !strcmp(argv[i], "|");
+	int	i;
+	int fd[2];
+	int tmp_fd;
+	(void)argc;
 
-    if (!has_pipe && !strcmp(*argv, "cd"))
-        return cd(argv, i);
-
-    if (has_pipe && pipe(fd) == -1)
-        return err("error: fatal\n");
-
-    int pid = fork();
-    if (!pid)
-    {
-        argv[i] = 0;
-        if (has_pipe && (dup2(fd[1], 1) == -1 || close(fd[0]) == -1 || close(fd[1]) == -1))
-            return err("error: fatal\n");
-        if (!strcmp(*argv, "cd"))
-            return cd(argv, i);
-        execve(*argv, argv, __environ);
-        return err("error: cannot execute "), err(*argv), err("\n");
-    }
-
-    waitpid(pid, &status, 0);
-    if (has_pipe && (dup2(fd[0], 0) == -1 || close(fd[0]) == -1 || close(fd[1]) == -1))
-        return err("error: fatal\n");
-    return WIFEXITED(status) && WEXITSTATUS(status);
-}
-
-int main(int argc, char **argv)
-{
-    int    i = 0;
-    int    status = 0;
-
-    if (argc > 1)
-    {
-        while (argv[i] && argv[++i])
-        {
-            argv += i;
-            i = 0;
-            while (argv[i] && strcmp(argv[i], "|") && strcmp(argv[i], ";"))
-                i++;
-            if (i)
-                status = exec(argv, i);
-        }
-    }
-    return status;
+	i = 0;
+	tmp_fd = dup(STDIN_FILENO);
+	while (argv[i] && argv[i + 1])
+	{
+		argv = &argv[i + 1];
+		i = 0;
+		while (argv[i] && strcmp(argv[i], ";") && strcmp(argv[i], "|"))
+			i++;
+		if (strcmp(argv[0], "cd") == 0)
+		{
+			if (i != 2)
+				ft_putstr_fd2("error: cd: bad arguments", NULL);
+			else if (chdir(argv[1]) != 0)
+				ft_putstr_fd2("error: cd: cannot change directory to ", argv[1]	);
+		}
+		else if (i != 0 && (argv[i] == NULL || strcmp(argv[i], ";") == 0))
+		{
+			if ( fork() == 0)
+				ft_execute(argv, i, tmp_fd, env);
+			else
+			{
+				close(tmp_fd);
+				while(waitpid(-1, NULL, WUNTRACED) != -1)
+					;
+				tmp_fd = dup(STDIN_FILENO);
+			}
+		}
+		else if(i != 0 && strcmp(argv[i], "|") == 0)
+		{
+			pipe(fd);
+			if ( fork() == 0)
+			{
+				dup2(fd[1], STDOUT_FILENO);
+				close(fd[0]);
+				close(fd[1]);
+				ft_execute(argv, i, tmp_fd, env);
+			}
+			else
+			{
+				close(fd[1]);
+				close(tmp_fd);
+				tmp_fd = fd[0];
+			}
+		}
+	}
+	close(tmp_fd);
+	return (0);
 }
