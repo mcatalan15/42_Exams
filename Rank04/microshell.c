@@ -13,7 +13,7 @@ void	ft_putstr_fd2(char *str, char *arg)
 	write(2, "\n", 1);
 }
 
-void ft_execute(char *argv[], int i, int tmp_fd, char *env[])
+void ft_execute(char **argv, int i, int tmp_fd, char **env)
 {
 	argv[i] = NULL;
 	dup2(tmp_fd, STDIN_FILENO);
