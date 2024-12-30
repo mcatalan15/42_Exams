@@ -2,19 +2,21 @@
 #include <iostream>
 #include "ASpell.hpp"
 
+using std::string;
+
 class ASpell;
 
-class ATarget 
-{
+class ATarget {
 	protected :
-		std::string _type;
+		string _type;
 	
 	public :
-		ATarget(std::string type);
+		ATarget(string type);
 		ATarget & operator=(ATarget const & rhs);
 		ATarget(ATarget const & obj);
 		virtual ~ATarget();
-		std::string getType() const;
+		string getType() const;
 		virtual ATarget* clone() const = 0;
 		void	getHitBySpell(ASpell const & spell) const;
 };
+

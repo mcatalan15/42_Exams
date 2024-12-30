@@ -1,7 +1,5 @@
 #include "Warlock.hpp"
 
-using std::string;
-
 Warlock::Warlock(const string &name, const string &title) : _name(name), _title(title) {
 	std::cout << _name << ": This looks like another boring day." << std::endl;
 }
@@ -18,7 +16,7 @@ Warlock::Warlock(Warlock const &obj) { *this = obj; }
 
 Warlock::~Warlock() {
  	std::cout << _name <<  ": My job here is done!" << std::endl;
-	for (std::map<std::string, ASpell*>::iterator it = _SpellBook.begin(); it != _SpellBook.end(); ++it)
+	for (std::map<string, ASpell*>::iterator it = _SpellBook.begin(); it != _SpellBook.end(); ++it)
 		delete it->second;
 	_SpellBook.clear();
 } 

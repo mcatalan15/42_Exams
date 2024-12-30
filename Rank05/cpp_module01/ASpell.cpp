@@ -20,5 +20,3 @@ string ASpell::getEffects() const { return(_effects); }
 
 void ASpell::launch(ATarget const &target) const { target.getHitBySpell(*this); }
 
-
-

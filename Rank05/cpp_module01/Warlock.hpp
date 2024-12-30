@@ -11,7 +11,7 @@ class Warlock {
 		Warlock();
 		string _name;
 		string _title;
-		std::map < std::string, ASpell * > _SpellBook;
+		std::map < string, ASpell * > _SpellBook;
   
 	public:
 		Warlock(const string &name, const string &title);
