@@ -2,8 +2,8 @@
 #include "ATarget.hpp"
 
 class BrickWall : public ATarget {
-	public :
-		BrickWall();
-		~BrickWall();
-		ATarget* clone() const;
+	public:
+		BrickWall() : ATarget("Inconspicuous Red-brick Wall") {}
+		~BrickWall() {}
+		ATarget *clone() const { return (new BrickWall()); }
 };

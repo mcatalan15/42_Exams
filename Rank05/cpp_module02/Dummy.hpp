@@ -2,8 +2,8 @@
 #include "ATarget.hpp"
 
 class Dummy : public ATarget {
-	public :
-		Dummy();
-		~Dummy();
-		ATarget* clone() const;
+	public:
+		Dummy() : ATarget("Target Practice Dummy") {}
+		~Dummy() {}
+		ATarget *clone() const { return (new Dummy()); }
 };
