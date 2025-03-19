@@ -12,12 +12,16 @@ class ASpell {
 		string _effects;
 
 	public:
-		ASpell(string name, string effects);
-		ASpell &operator=(ASpell const &rhs);
-		ASpell(ASpell const &obj);
-		virtual ~ASpell();
-		string getName() const;
-		string getEffects() const;
+		ASpell(string name, string effects) : _name(name), _effects(effects) {}
+		ASpell &operator=(ASpell const &rhs) {
+			_name = rhs.getName();
+			_effects = rhs.getEffects();
+			return *this;
+		}
+		ASpell (ASpell const &obj) { *this = obj; }
+		virtual ~ASpell() {}
+		string getName() const { return (_name); }
+		string getEffects() const {return _effects; }
 		virtual ASpell *clone() const = 0;
 		void launch(ATarget const &target) const;
 };

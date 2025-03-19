@@ -11,11 +11,14 @@ class ATarget {
 		string _type;
 
 	public:
-		ATarget (string effects);
-		ATarget &operator=(ATarget const &rhs);
-		ATarget(ATarget const &obj);
-		virtual ~ATarget();
-		string getType() const;
+		ATarget(string type) : _type(type) {}
+		ATarget &operator=(ATarget const &rhs) {
+			_type = rhs.getType();
+			return *this;
+		}
+		ATarget(ATarget const &obj) { *this = obj; }
+		virtual ~ATarget() {}
+		string getType() const { return (_type); }
 		virtual ATarget *clone() const = 0;
-		void getHitBySpell(ASpell const &target) const;
+		void getHitBySpell(ASpell const &spell) const;
 };
