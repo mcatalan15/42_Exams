@@ -8,18 +8,23 @@
 #include <stdlib.h>
 #include <unistd.h>
 
-int	maxClients = 2000;
-int	client[2000] = {-1};
-char	*message[2000];
-fd_set	cur, cur_write, cur_read;
+int maxClients = 2000;
+int client[2000] = {-1};
+char *message[2000];
+fd_set cur, cur_write, cur_read;
 
-void	exit_error()
+void exit_error(char *msg)
 {
-	write(2, "Fatal error\n", strlen("Fatal error\n"));
+	write(2, msg, strlen(msg));
 	exit(1);
 }
 
-void	send_message(int fd, char *str)
+void fatal_error()
+{
+	exit_error("Fatal error\n");
+}
+
+void send_message(int fd, char *str)
 {
 	for (int i = 0; i < maxClients; i++)
 	{
@@ -28,10 +33,10 @@ void	send_message(int fd, char *str)
 	}
 }
 
-int	extract_message(char **buf, char **msg)
+int extract_message(char **buf, char **msg)
 {
-	char	*new;
-	int	i = -1;
+	char *new;
+	int i = -1;
 
 	*msg = 0;
 	if (*buf == 0)
@@ -53,10 +58,10 @@ int	extract_message(char **buf, char **msg)
 	return 0;
 }
 
-char	*str_join(char *buf, char *add)
+char *str_join(char *buf, char *add)
 {
-	char	*new;
-	int	len = (buf == 0 ? 0 : strlen(buf));
+	char *new;
+	int len = (buf == 0 ? 0 : strlen(buf));
 
 	new = calloc(sizeof(*new), len + strlen(add) + 1);
 	if (!new)
@@ -69,98 +74,92 @@ char	*str_join(char *buf, char *add)
 	return new;
 }
 
-int	main(int argc, char **argv)
+int main(int argc, char **argv)
 {
-	if (argc == 2)
+	if (argc != 2)
+		exit_error("Wrong number of arguments\n");
+	struct sockaddr_in servaddr;
+	int sockfd;
+	int max;
+	int index = 0;
+
+	sockfd = socket(AF_INET, SOCK_STREAM, 0);
+	if (sockfd == -1)
+		fatal_error();
+
+	bzero(&servaddr, sizeof(servaddr));
+	servaddr.sin_family = AF_INET;
+	servaddr.sin_addr.s_addr = htonl(2130706433);
+	servaddr.sin_port = htons(atoi(argv[1]));
+
+	if (bind(sockfd, (const struct sockaddr *)&servaddr, sizeof(servaddr)) != 0)
+		fatal_error();
+	if (listen(sockfd, 128) != 0)
+		fatal_error();
+
+	FD_SET(sockfd, &cur);
+	max = sockfd;
+
+	while (1)
 	{
-		struct sockaddr_in	servaddr;
-		int			sockfd;
-		int			max;
-		int			index = 0;
-
-		sockfd = socket(AF_INET, SOCK_STREAM, 0);
-		if (sockfd == -1)
-			exit_error();
-
-		bzero(&servaddr, sizeof(servaddr));
-		servaddr.sin_family = AF_INET;
-		servaddr.sin_addr.s_addr = htonl(2130706433);
-		servaddr.sin_port = htons(atoi(argv[1]));
-
-		if (bind(sockfd, (const struct sockaddr *)&servaddr, sizeof(servaddr)) != 0)
-			exit_error();
-		if (listen(sockfd, 128) != 0)
-			exit_error();
-
-		FD_SET(sockfd, &cur);
-		max = sockfd;
-
-		while (1)
+		cur_read = cur_write = cur;
+		if (select(max + 1, &cur_read, &cur_write, NULL, NULL) < 0)
+			continue;
+		for (int fd = 0; fd <= max; fd++)
 		{
-			cur_read = cur_write = cur;
-			if (select(max + 1, &cur_read, &cur_write, NULL, NULL) < 0)
-				continue;
-			for (int fd = 0; fd <= max; fd++)
+			if (FD_ISSET(fd, &cur_read))
 			{
-				if (FD_ISSET(fd, &cur_read))
+				if (fd == sockfd)
 				{
-					if (fd == sockfd)
+					int newclient = accept(sockfd, NULL, NULL);
+					char str[100];
+
+					if (newclient <= 0)
+						continue;
+
+					client[newclient] = index++;
+					message[newclient] = malloc(1);
+					message[newclient][0] = 0;
+					FD_SET(newclient, &cur);
+
+					if (newclient > max)
+						max = newclient;
+					sprintf(str, "server: client %d just arrived\n", index - 1);
+					send_message(newclient, str);
+				}
+				else
+				{
+					char buffer[4095];
+					int lent = recv(fd, buffer, 4094, 0);
+
+					if (lent <= 0)
 					{
-						int	newclient = accept(sockfd, NULL, NULL);
-						char	str[100];
+						char str[100];
 
-						if (newclient <= 0)
-							continue;
+						sprintf(str, "server: client %d just left\n", client[fd]);
+						send_message(fd, str);
 
-						client[newclient] = index++;
-						message[newclient] = malloc(1);
-						message[newclient][0] = 0;
-						FD_SET(newclient, &cur);
-
-						if (newclient > max)
-							max = newclient;
-						sprintf(str, "server: client %d just arrived\n", index - 1);
-						send_message(newclient, str);
+						client[fd] = -1;
+						FD_CLR(fd, &cur);
+						close(fd);
 					}
 					else
 					{
-						char	buffer[4095];
-						int	lent = recv(fd, buffer, 4094, 0);
+						char *msg;
 
-						if (lent <= 0)
+						buffer[lent] = 0;
+						message[fd] = str_join(message[fd], buffer);
+
+						while (extract_message(&message[fd], &msg))
 						{
-							char	str[100];
+							char str[strlen(msg) + 100];
 
-							sprintf(str, "server: client %d just left\n", client[fd]);
+							sprintf(str, "client %d: %s", client[fd], msg);
 							send_message(fd, str);
-
-							client[fd] = -1;
-							FD_CLR(fd, &cur);
-							close(fd);
-						}
-						else
-						{
-							char	*msg;
-
-							buffer[lent] = 0;
-							message[fd] = str_join(message[fd], buffer);
-							
-							while (extract_message(&message[fd], &msg))
-							{
-								char	str[strlen(msg) + 100];
-
-								sprintf(str, "client %d: %s", client[fd], msg);
-								send_message(fd, str);
-							}
 						}
 					}
 				}
 			}
 		}
-	}
-	else
-	{
-		write(2, "Wrong number of arguments\n", strlen("Wrong number of arguments\n"));
-		exit(1);
 	}
 }
