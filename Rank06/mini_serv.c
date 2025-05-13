@@ -1,159 +1,161 @@
+#include <sys/socket.h>
+#include <sys/select.h>
+#include <netdb.h>
+#include <netinet/in.h>
+#include <stdio.h>
 #include <errno.h>
 #include <string.h>
-#include <unistd.h>
-#include <netdb.h>
-#include <sys/socket.h>
-#include <netinet/in.h>
 #include <stdlib.h>
-#include <stdio.h>
+#include <unistd.h>
 
-#define MAX_CLIENTS 10000
-#define MAX_BUFFER 4000000
+int maxClients = 2000;
+int client[2000] = {-1};
+char *message[2000];
+fd_set cur, cur_write, cur_read;
+
+void exit_error(char *msg)
+{
+	write(2, msg, strlen(msg));
+	exit(1);
+}
+
+void fatal_error()
+{
+	exit_error("Fatal error\n");
+}
+
+void send_message(int fd, char *str)
+{
+	for (int i = 0; i < maxClients; i++)
+	{
+		if (client[i] != -1 && i != fd && FD_ISSET(i, &cur_write))
+			send(i, str, strlen(str), 0);
+	}
+}
 
 int extract_message(char **buf, char **msg)
 {
-	char	*newbuf;
-	int	i;
+	char *new;
+	int i = -1;
 
 	*msg = 0;
 	if (*buf == 0)
-		return (0);
-	i = 0;
-	while ((*buf)[i])
+		return 0;
+	while ((*buf)[++i])
 	{
 		if ((*buf)[i] == '\n')
 		{
-			newbuf = calloc(1, sizeof(*newbuf) * (strlen(*buf + i + 1) + 1));
-			if (newbuf == 0)
-				return (-1);
-			strcpy(newbuf, *buf + i + 1);
+			new = calloc(sizeof(*new), strlen(*buf + i + 1) + 1);
+			if (!new)
+				return -1;
+			strcpy(new, *buf + i + 1);
 			*msg = *buf;
 			(*msg)[i + 1] = 0;
-			*buf = newbuf;
-			return (1);
+			*buf = new;
+			return 1;
 		}
-		i++;
 	}
-	return (0);
+	return 0;
 }
 
 char *str_join(char *buf, char *add)
 {
-	char	*newbuf;
-	int		len;
+	char *new;
+	int len = (buf == 0 ? 0 : strlen(buf));
 
-	if (buf == 0)
-		len = 0;
-	else
-		len = strlen(buf);
-	newbuf = malloc(sizeof(*newbuf) * (len + strlen(add) + 1));
-	if (newbuf == 0)
-		return (0);
-	newbuf[0] = 0;
-	if (buf != 0)
-		strcat(newbuf, buf);
+	new = calloc(sizeof(*new), len + strlen(add) + 1);
+	if (!new)
+		return NULL;
+	new[0] = 0;
+	if (buf)
+		strcat(new, buf);
 	free(buf);
-	strcat(newbuf, add);
-	return (newbuf);
+	strcat(new, add);
+	return new;
 }
-
-void fatal_error(char *msg)
-{
-	write(2,msg,strlen(msg));
-	exit(1);
-}
-
-typedef struct s_client
-{
-	int id;
-	char *buf;
-} t_client;
 
 int main(int argc, char **argv)
 {
-	t_client clients[MAX_CLIENTS];
-	bzero(clients, sizeof(clients));
-	char buffer[MAX_BUFFER];
-	bzero(buffer,sizeof(buffer));
-	int id = 0;
-	if (argc!=2)
-		fatal_error("Wrong number of arguments\n");
-	int serverSocket = socket(AF_INET, SOCK_STREAM, 0);
-	if (serverSocket == -1)
-		fatal_error("Fatal error\n");
+	if (argc != 2)
+		exit_error("Wrong number of arguments\n");
 	struct sockaddr_in servaddr;
+	int sockfd;
+	int max;
+	int index = 0;
+
+	sockfd = socket(AF_INET, SOCK_STREAM, 0);
+	if (sockfd == -1)
+		fatal_error();
+
 	bzero(&servaddr, sizeof(servaddr));
 	servaddr.sin_family = AF_INET;
 	servaddr.sin_addr.s_addr = htonl(2130706433);
 	servaddr.sin_port = htons(atoi(argv[1]));
-  	if ((bind(serverSocket, (const struct sockaddr *)&servaddr, sizeof(servaddr))) != 0)
-		fatal_error("Fatal error\n");
-	if (listen(serverSocket, 3001) != 0)
-		fatal_error("Fatal error\n");
-	fd_set currentSockets, readSockets, writeSockets;
-	FD_ZERO(&currentSockets);
-	FD_SET(serverSocket, &currentSockets);
-	int max_socket = serverSocket;	
-	while(1)
+
+	if (bind(sockfd, (const struct sockaddr *)&servaddr, sizeof(servaddr)) != 0)
+		fatal_error();
+	if (listen(sockfd, 128) != 0)
+		fatal_error();
+
+	FD_SET(sockfd, &cur);
+	max = sockfd;
+
+	while (1)
 	{
-		readSockets = currentSockets;
-		writeSockets = currentSockets;
-		if(select(max_socket + 1, &readSockets, &writeSockets, NULL, NULL) == -1)
+		cur_read = cur_write = cur;
+		if (select(max + 1, &cur_read, &cur_write, NULL, NULL) < 0)
 			continue;
-		for (int fd = 0; fd <= max_socket; fd++)
+		for (int fd = 0; fd <= max; fd++)
 		{
-			if (FD_ISSET(fd, &readSockets))
+			if (FD_ISSET(fd, &cur_read))
 			{
-				if (fd == serverSocket)
+				if (fd == sockfd)
 				{
-					int clientSocket = accept(fd,0,0);
-					if (clientSocket == -1)
+					int newclient = accept(sockfd, NULL, NULL);
+					char str[100];
+
+					if (newclient <= 0)
 						continue;
-					if (clientSocket > max_socket)
-						max_socket = clientSocket;
-					clients[clientSocket].id = id++;
-					clients[clientSocket].buf = 0;
-					FD_SET(clientSocket, &currentSockets);
-					char tmp[50];
-					sprintf(tmp, "server: client %d just arrived\n", id - 1);
-					for (int i = 0; i <= max_socket; i++)
-						if (i != fd && FD_ISSET(i, &writeSockets))
-							send(i,tmp,strlen(tmp),0);
+
+					client[newclient] = index++;
+					message[newclient] = malloc(1);
+					message[newclient][0] = 0;
+					FD_SET(newclient, &cur);
+
+					if (newclient > max)
+						max = newclient;
+					sprintf(str, "server: client %d just arrived\n", index - 1);
+					send_message(newclient, str);
 				}
 				else
 				{
-					bzero(buffer,sizeof(buffer));
-					if (recv(fd,buffer,sizeof(buffer),0) <= 0)
+					char buffer[4095];
+					int lent = recv(fd, buffer, 4094, 0);
+
+					if (lent <= 0)
 					{
+						char str[100];
+
+						sprintf(str, "server: client %d just left\n", client[fd]);
+						send_message(fd, str);
+
+						client[fd] = -1;
+						FD_CLR(fd, &cur);
 						close(fd);
-						FD_CLR(fd, &currentSockets);
-						char tmp[50];
-						sprintf(tmp, "server: client %d just left\n", clients[fd].id);
-						clients[fd].id = 0;
-						if (clients[fd].buf)
-						{
-							free(clients[fd].buf);
-							clients[fd].buf = 0;
-						}
-						for (int i = 0; i <= max_socket; i++)
-							if (i != fd && FD_ISSET(i, &writeSockets))
-								send(i,tmp,strlen(tmp),0);		
 					}
 					else
 					{
-						clients[fd].buf = str_join(clients[fd].buf,buffer);
-						char tmp[50];
-						sprintf(tmp, "client %d: ", clients[fd].id);
 						char *msg;
-						while(extract_message(&clients[fd].buf,&msg))
+
+						buffer[lent] = 0;
+						message[fd] = str_join(message[fd], buffer);
+
+						while (extract_message(&message[fd], &msg))
 						{
-							for (int i = 0; i <= max_socket; i++)
-								if (i != fd && FD_ISSET(i, &writeSockets))
-								{
-									send(i,tmp,strlen(tmp),0);
-									send(i,msg,strlen(msg),0);
-								}
-							free(msg);
+							char str[strlen(msg) + 100];
+
+							sprintf(str, "client %d: %s", client[fd], msg);
+							send_message(fd, str);
 						}
 					}
 				}
